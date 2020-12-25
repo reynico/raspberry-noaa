@@ -250,6 +250,8 @@ echo "
 
 set +e
 
+sudo mkdir -p /usr/share/html/iss
+
 ### Running WXTOIMG to have the user accept the licensing agreement
 wxtoimg
 
