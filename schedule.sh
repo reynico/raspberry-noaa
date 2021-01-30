@@ -16,6 +16,7 @@ grep "NOAA 15" "${NOAA_HOME}"/predict/weather.txt -A 2 > "${NOAA_HOME}"/predict/
 grep "NOAA 18" "${NOAA_HOME}"/predict/weather.txt -A 2 >> "${NOAA_HOME}"/predict/weather.tle
 grep "NOAA 19" "${NOAA_HOME}"/predict/weather.txt -A 2 >> "${NOAA_HOME}"/predict/weather.tle
 grep "METEOR-M 2" "${NOAA_HOME}"/predict/weather.txt -A 2 >> "${NOAA_HOME}"/predict/weather.tle
+grep "METEOR-M2 2" "${NOAA_HOME}"/predict/weather.txt -A 2 >> "${NOAA_HOME}"/predict/weather.tle
 if [ "$SCHEDULE_ISS" == "true" ]; then
     grep "ZARYA" "${NOAA_HOME}"/predict/amateur.txt -A 2 > "${NOAA_HOME}"/predict/amateur.tle
 fi

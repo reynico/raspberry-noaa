@@ -132,12 +132,17 @@ else
 fi
 
 ### install predict
-$orig_dir=$(pwd)
-cd software
-tar -xzf predict-2.2.7.tar.gz
-cd predict-2.2.7
-sudo ./configure	#this also installs :X
-cd $orig_dir
+if [ -e $(which predict) ]; then
+    log_done "predict was already installed"
+else
+    $orig_dir=$(pwd)
+    cd software
+    tar -xzf predict-2.2.7.tar.gz
+    cd predict-2.2.7
+    sudo ./configure	#this also installs :X
+    cd $orig_dir
+    log_done "predict installed"
+fi
 
 ### Install default config file
 if [ -e "$HOME/.noaa.conf" ]; then

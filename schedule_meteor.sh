@@ -26,7 +26,7 @@ while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 	OUTDATE=$(date --date="TZ=\"UTC\" ${START_TIME}" +%Y%m%d-%H%M%S)
 
 	if [ "${MAXELEV}" -gt "${METEOR_MIN_ELEV}" ]; then
-		log "Pass is above ${METEOR_MIN_ELEV}, that is OK for me" "INFO"
+		log "Pass at ${MAXELEV} is above ${METEOR_MIN_ELEV}, that is OK for me" "INFO"
 		SATNAME=$(echo "$1" | sed "s/ //g")
 		echo "${SATNAME}" "${OUTDATE}" "$MAXELEV"
 		echo "${NOAA_HOME}/receive_meteor.sh \"${1}\" $2 ${SATNAME}${OUTDATE} "${NOAA_HOME}"/predict/weather.tle \
