@@ -46,7 +46,8 @@ log "Starting rtl_fm record" "INFO"
 timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -M raw -f "${2}"M -s 288k $GAIN | sox -t raw -r 288k -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" rate 96k
 
 log "Demodulation in progress (QPSK)" "INFO"
-meteor_demod -B -o "${METEOR_OUTPUT}/${3}.qpsk" "${RAMFS_AUDIO}/audio/${3}.wav"
+[ $1 = "METEOR-M2 2"] && demod_extra="-m opsk"
+meteor_demod $demod_extra -B -o "${METEOR_OUTPUT}/${3}.qpsk" "${RAMFS_AUDIO}/audio/${3}.wav"
 
 if [ "$DELETE_AUDIO" = true ]; then
     log "Deleting audio files" "INFO"
@@ -59,7 +60,8 @@ else
 fi
 
 log "Decoding in progress (QPSK to BMP)" "INFO"
-medet_arm "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
+[ $1 = "METEOR-M2 2"] && medet_extra="-diff"
+medet_arm $medet_extra "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
 
 rm "${METEOR_OUTPUT}/${3}.qpsk"
 
