@@ -53,12 +53,12 @@ if [ "$raspbian_version" == "stretch" ]; then
 fi
 
 sudo apt update -yq
-sudo apt install -yq predict \
-                     python-setuptools \
+sudo apt install -yq python-setuptools \
                      ntp \
+		     unzip zip \
                      cmake \
-                     libusb-1.0 \
-                     sox \
+                     libusb-1.0-0-dev \
+                     sox libsox-fmt-mp3 \
                      at \
                      bc \
                      nginx \
@@ -72,8 +72,8 @@ sudo apt install -yq predict \
                      libjpeg9 \
                      libjpeg9-dev \
                      socat \
-                     php7.2-fpm \
-                     php7.2-sqlite \
+                     php7.4-fpm \
+                     php7.4-sqlite3 \
                      sqlite3
 
 if [ "$raspbian_version" == "stretch" ]; then
@@ -130,6 +130,12 @@ else
     sudo dpkg -i software/wxtoimg-armhf-2.11.2-beta.deb
     log_done "WxToIMG installed"
 fi
+
+### install predict
+$orig_dir=$(pwd)
+cd software
+#todo: Build predict
+cd $orig_dir
 
 ### Install default config file
 if [ -e "$HOME/.noaa.conf" ]; then
@@ -192,23 +198,24 @@ crontab -l | grep -q "raspberry-noaa"
 if [ $? -eq 0 ]; then
     log_done "Crontab for schedule.sh already exists"
 else
-    cat <(crontab -l) <(echo "1 0 * * * /home/pi/raspberry-noaa/schedule.sh") | crontab -
+    cat <(crontab -l) <(echo "1 0 * * * $HOME/raspberry-noaa/schedule.sh") | crontab -
     log_done "Crontab installed"
 fi
 set -e
 
 ### Setup Nginx
 log_running "Setting up Nginx..."
+usr=$(whoami)
 sudo cp templates/nginx.cfg /etc/nginx/sites-enabled/default
 (
     sudo mkdir -p /var/www/wx/images
-    sudo chown -R pi:pi /var/www/wx
-    sudo usermod -a -G www-data pi
+    sudo chown -R $usr:$usr /var/www/wx
+    sudo usermod -a -G www-data $usr
     sudo chmod 775 /var/www/wx
 )
 sudo systemctl restart nginx
 sudo cp -rp templates/webpanel/* /var/www/wx/
-
+sed -i -e "s/pi/${usr}/g" "/var/www/wx/Model/Conn.php"
 log_done "Nginx configured"
 
 ### Setup ramFS
@@ -298,7 +305,7 @@ read -rp "Enter your longitude (West values are negative): "
 read -rp "Enter your timezone offset (ex: -3 for Argentina time): "
     tzoffset=$REPLY
 
-sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.noaa.conf"
+sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/pi/${usr}/g" "$HOME/.noaa.conf"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.wxtoimgrc"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/$(echo  "$lon * -1" | bc)/g" "$HOME/.predict/predict.qth"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/change_tz/$(echo  "$tzoffset * -1" | bc)/g" "sun.py"
@@ -315,4 +322,8 @@ set +e
 ### Running WXTOIMG to have the user accept the licensing agreement
 wxtoimg
 
-sudo reboot
+read -rp "reboot now? (Y/n)"
+    doreboot=$REPLY
+
+[ ! -z "$doreboot" ] || sudo reboot
+[ "$doreboot" == "y" ] && sudo reboot
