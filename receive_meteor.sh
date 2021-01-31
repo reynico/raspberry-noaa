@@ -43,7 +43,7 @@ fi
 # $7 = Satellite max elevation
 
 log "Starting rtl_fm record" "INFO"
-timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M -s 288k $GAIN | sox -t raw -r 288k -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" rate 96k
+timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M -s 288k $GAIN | sox -t raw -r 288k -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" #rate 96k
 
 log "Demodulation in progress (QPSK)" "INFO"
 [ $1 = "METEOR-M2 2"] && demod_extra="-m opsk"
