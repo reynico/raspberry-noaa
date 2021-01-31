@@ -90,7 +90,8 @@ if [ -f "${METEOR_OUTPUT}/${3}.dec" ]; then
         log "Posting to Twitter" "INFO"
         python3 "${NOAA_HOME}/post.py" "$1 ${START_DATE} Resolución completa: https://weather.reyni.co/detail.php?id=$pass_id" "$7" "${NOAA_OUTPUT}/images/${3}-122-rectified.jpg"
     fi
-    sqlite3 $HOME/raspberry-noaa/panel.db "update predict_passes set is_active = 0 where (predict_passes.pass_start) in (select predict_passes.pass_start from predict_passes inner join decoded_passes on predict_passes.pass_start = decoded_passes.pass_start where decoded_passes.id = $pass_id);"
 else
     log "Decoding failed, either a bad pass/low SNR or a software problem" "ERROR"
 fi
+
+sqlite3 $HOME/raspberry-noaa/panel.db "update predict_passes set is_active = 0 where (predict_passes.pass_start) in (select predict_passes.pass_start from predict_passes inner join decoded_passes on predict_passes.pass_start = decoded_passes.pass_start where decoded_passes.id = $pass_id);"
