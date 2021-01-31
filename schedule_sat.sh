@@ -25,6 +25,8 @@ var2=$(echo "${PREDICTION_END}" | cut -d " " -f 1)
 
 MAXELEV=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | awk -v max=0 '{if($5>max){max=$5}}END{print max}')
 
+log "Looking for passes of $1" INFO
+
 while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 	START_TIME=$(echo "$PREDICTION_START" | cut -d " " -f 3-4)
 	var1=$(echo "$PREDICTION_START" | cut -d " " -f 1)
@@ -38,6 +40,8 @@ while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 		echo "${NOAA_HOME}/receive.sh \"${1}\" $2 ${SATNAME}${OUTDATE} "${NOAA_HOME}"/predict/weather.tle \
 ${var1} ${TIMER} ${MAXELEV}" | at "$(date --date="TZ=\"UTC\" ${START_TIME}" +"%H:%M %D")"
 		sqlite3 $HOME/raspberry-noaa/panel.db "insert or replace into predict_passes (sat_name,pass_start,pass_end,max_elev,is_active) values (\"$SATNAME\",$var1,$var2,$MAXELEV, 1);"
+	else
+		log "Max. elevation ${MAXELEV} too small for configured ${SAT_MIN_ELEV}" DEBUG
 	fi
 	NEXTPREDICT=$(expr "${var2}" + 60)
 	PREDICTION_START=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" "${NEXTPREDICT}" | head -1)
