@@ -31,7 +31,7 @@ fi
 # $7 = Satellite max elevation
 
 log "Starting rtl_fm record" "INFO"
-timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -f "${2}"M -s 60k $GAIN -E wav -E deemp -F 9 - | /usr/bin/sox -t raw -e signed -c 1 -b 16 -r 60000 - "${RAMFS_AUDIO}/audio/${3}.wav" rate 11025
+timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -f "${2}"M -s 60k $GAIN -p $PPM_ERROR -E wav -E deemp -F 9 - | /usr/bin/sox -t raw -e signed -c 1 -b 16 -r 60000 - "${RAMFS_AUDIO}/audio/${3}.wav" rate 11025
 
 if [ "${SUN_ELEV}" -gt "${SUN_MIN_ELEV}" ]; then
 	ENHANCEMENTS="ZA MCIR MCIR-precip MSA MSA-precip HVC-precip HVCT-precip HVC HVCT"
@@ -41,7 +41,7 @@ else
 	daylight="false"
 fi
 
-log "Bulding pass map" "INFO"
+log "Bulding pass map wxtoimg " "INFO"
 /usr/local/bin/wxmap -T "${1}" -H "${4}" -p 0 -l 0 -o "${PASS_START}" "${NOAA_HOME}/map/${3}-map.png"
 for i in $ENHANCEMENTS; do
 	log "Decoding image" "INFO"
@@ -49,6 +49,12 @@ for i in $ENHANCEMENTS; do
 	/usr/bin/convert -quality 98 -format jpg "${NOAA_OUTPUT}/images/${3}-$i.jpg" -undercolor black -fill yellow -pointsize 18 -annotate +20+20 "${1} $i ${START_DATE} Elev: $7°" "${NOAA_OUTPUT}/images/${3}-$i.jpg"
 	/usr/bin/convert -thumbnail 300 "${NOAA_OUTPUT}/images/${3}-$i.jpg" "${NOAA_OUTPUT}/images/thumb/${3}-$i.jpg"
 done
+
+log "Building noaa-apt maps"
+noaa-apt "${RAMFS_AUDIO}/audio/${3}.wav" -R auto -m yes -o "${NOAA_OUTPUT}/images/${3}-noaa-apt.png"
+/usr/bin/convert -quality 98 -format jpg "${NOAA_OUTPUT}/images/${3}-noaa-apt.png" -undercolor black -fill yellow -pointsize 18 -annotate +20+20 "${1} $i ${START_DATE} Elev: $7°" "${NOAA_OUTPUT}/images/${3}-noaa-apt.jpg"
+/usr/bin/convert -thumbnail 300 "${NOAA_OUTPUT}/images/${3}-noaa-apt.jpg" "${NOAA_OUTPUT}/images/thumb/${3}-noaa-apt.jpg"
+
 
 rm "${NOAA_HOME}/map/${3}-map.png"
 
