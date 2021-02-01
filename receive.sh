@@ -55,7 +55,7 @@ noaa-apt "${RAMFS_AUDIO}/audio/${3}.wav" -R auto -m yes -o "${NOAA_OUTPUT}/image
 /usr/bin/convert -quality 98 -format jpg "${NOAA_OUTPUT}/images/${3}-noaa-apt.png" -undercolor black -fill yellow -pointsize 18 -annotate +20+20 "${1} $i ${START_DATE} Elev: $7°" "${NOAA_OUTPUT}/images/${3}-noaa-apt.jpg"
 /usr/bin/convert -thumbnail 300 "${NOAA_OUTPUT}/images/${3}-noaa-apt.jpg" "${NOAA_OUTPUT}/images/thumb/${3}-noaa-apt.jpg"
 
-
+rm "${NOAA_OUTPUT}/images/${3}-noaa-apt.png"
 rm "${NOAA_HOME}/map/${3}-map.png"
 
 if [ "${SUN_ELEV}" -gt "${SUN_MIN_ELEV}" ]; then
