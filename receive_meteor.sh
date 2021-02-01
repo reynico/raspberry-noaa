@@ -47,7 +47,7 @@ timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M
 
 log "Demodulation in progress (QPSK)" "INFO"
 [ $1 = "METEOR-M2 2"] && demod_extra="-m opsk"
-meteor_demod $demod_extra -B -o "${METEOR_OUTPUT}/${3}.qpsk" "${RAMFS_AUDIO}/audio/${3}.wav"
+meteor_demod $demod_extra -B -o "${METEOR_OUTPUT}/${3}.qpsk" "${RAMFS_AUDIO}/audio/${3}.wav" 2>> $NOAA_LOG
 
 if [ "$DELETE_AUDIO" = true ]; then
     log "Deleting audio files" "INFO"

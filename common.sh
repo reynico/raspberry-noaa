@@ -21,7 +21,7 @@ log() {
 
     #log here
     echo "${log_priority} : ${log_message}"
-    echo $(date '+%d-%m-%Y %H:%M') $0 "${log_priority} : ${log_message}" >> /var/log/noaa.log
+    echo $(date '+%d-%m-%Y %H:%M') $0 "${log_priority} : ${log_message}" >> "$NOAA_LOG"
 }
 
 ## current date and folder structure
