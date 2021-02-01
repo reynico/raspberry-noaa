@@ -31,7 +31,7 @@ if [ "$SCHEDULE_ISS" == "true" ]; then
     "${NOAA_HOME}"/schedule_iss.sh "ISS (ZARYA)" 145.8000
 fi
 "${NOAA_HOME}"/schedule_meteor.sh "METEOR-M 2" 137.1000
-"${NOAA_HOME}"/schedule_meteor.sh "METEOR-M2 2" 137.9000
+#"${NOAA_HOME}"/schedule_meteor.sh "METEOR-M2 2" 137.9000	#Meteor M2-2 will never send LRPT again :(
 "${NOAA_HOME}"/schedule_sat.sh "NOAA 19" 137.1000
 "${NOAA_HOME}"/schedule_sat.sh "NOAA 18" 137.9125
 "${NOAA_HOME}"/schedule_sat.sh "NOAA 15" 137.6200
