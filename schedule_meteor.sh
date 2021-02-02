@@ -17,6 +17,8 @@ var2=$(echo "${PREDICTION_END}" | cut -d " " -f 1)
 
 MAXELEV=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | awk -v max=0 '{if($5>max){max=$5}}END{print max}')
 
+log "Looking for passes of $1" INFO
+
 while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 	log "Pass prediction for $1 in progress" "INFO"
 	START_TIME=$(echo "$PREDICTION_START" | cut -d " " -f 3-4)

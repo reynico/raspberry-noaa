@@ -95,5 +95,5 @@ if [ -f "${METEOR_OUTPUT}/${3}.dec" ]; then
     fi
 else
     log "Decoding failed, either a bad pass/low SNR or a software problem" "ERROR"
-    sqlite3 $HOME/raspberry-noaa/panel.db "update predict_passes set is_active = 0 where predict_passes.pass_start = $5);"
+    sqlite3 $HOME/raspberry-noaa/panel.db "update predict_passes set is_active = 0 where predict_passes.pass_start = $5;"
 fi
