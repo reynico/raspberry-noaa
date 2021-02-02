@@ -42,9 +42,11 @@ fi
 # $6 = Time to capture
 # $7 = Satellite max elevation
 
+pre_rate=288k
+
 log "Starting rtl_fm record for $1 at $2 to $3 at epoch $5" "INFO"
-log "timeout \"${6}\" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f \"${2}\"M -s 144k $GAIN | sox -t raw -r 144k -c 2 -b 16 -e s - -t wav \"${RAMFS_AUDIO}/audio/${3}.wav\"" DEBUG
-timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M -s 144k $GAIN | sox -t raw -r 144k -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" #rate 96k
+log "timeout \"${6}\" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f \"${2}\"M -E dc -s $pre_rate $GAIN | sox -t raw -r $pre_rate -c 2 -b 16 -e s - -t wav \"${RAMFS_AUDIO}/audio/${3}.wav\"" DEBUG
+timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M -E dc -s $pre_rate $GAIN | sox -t raw -r $pre_rate -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" #rate 96k
 
 [ $1 = "METEOR-M2 2"] && demod_extra="-m opsk"
 log "Demodulation in progress (QPSK) $demod_extra" "INFO"
