@@ -18,14 +18,25 @@ fi
 # $6 = Time to capture
 # $7 = Satellite max elevation
 
+if [[ "$1" == *"NOAA"* ]]; then
+	receive_script="receive_noaa.sh"
+elif [[ "$1" == *"METEOR"* ]]; then
+	receive_script="receive_meteor.sh"
+else
+	log "No recognized receive skript for satellite $1!" ERROR
+	return -1
+fi
+
+log "Looking for passes of $1" INFO
+
 PREDICTION_START=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | head -1)
 PREDICTION_END=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | tail -1)
+
+[ -z "$PREDICTION_START" ] && log "predict did not return any values!" ERROR
 
 var2=$(echo "${PREDICTION_END}" | cut -d " " -f 1)
 
 MAXELEV=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | awk -v max=0 '{if($5>max){max=$5}}END{print max}')
-
-log "Looking for passes of $1" INFO
 
 while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 	START_TIME=$(echo "$PREDICTION_START" | cut -d " " -f 3-4)
@@ -37,7 +48,7 @@ while [ "$(date --date="@${var2}" +%D)" = "$(date +%D)" ]; do
 	if [ "${MAXELEV}" -gt "${SAT_MIN_ELEV}" ]; then
 		SATNAME=$(echo "$1" | sed "s/ //g")
 		echo "${SATNAME}" "${OUTDATE}" "$MAXELEV"
-		echo "${NOAA_HOME}/receive.sh \"${1}\" $2 ${SATNAME}-${OUTDATE} "${NOAA_HOME}"/predict/weather.tle \
+		echo "${NOAA_HOME}/${receive_script}.sh \"${1}\" $2 ${SATNAME}-${OUTDATE} "${NOAA_HOME}"/predict/weather.tle \
 ${var1} ${TIMER} ${MAXELEV}" | at "$(date --date="TZ=\"UTC\" ${START_TIME}" +"%H:%M %D")"
 		sqlite3 $HOME/raspberry-noaa/panel.db "insert or replace into predict_passes (sat_name,pass_start,pass_end,max_elev,is_active) values (\"$SATNAME\",$var1,$var2,$MAXELEV, 1);"
 	else
