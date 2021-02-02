@@ -19,9 +19,9 @@ fi
 # $7 = Satellite max elevation
 
 if [[ "$1" == *"NOAA"* ]]; then
-	receive_script="receive_noaa.sh"
+	receive_script="receive_noaa"
 elif [[ "$1" == *"METEOR"* ]]; then
-	receive_script="receive_meteor.sh"
+	receive_script="receive_meteor"
 else
 	log "No recognized receive skript for satellite $1!" ERROR
 	return -1
