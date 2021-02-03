@@ -4,6 +4,7 @@
 # set -x
 
 . "$HOME/.noaa.conf"
+export PATH=$PATH:/usr/local/bin/
 
 declare -A levels=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3)
 log_level=${LOG_LEVEL}
