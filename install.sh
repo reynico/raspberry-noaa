@@ -54,7 +54,6 @@ fi
 
 sudo apt update -yq
 sudo apt install -yq python-setuptools \
-                     ntp \
 		     unzip zip \
                      cmake \
                      libusb-1.0-0-dev \
