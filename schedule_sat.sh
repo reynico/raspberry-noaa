@@ -32,7 +32,7 @@ log "Looking for passes of $1" INFO
 PREDICTION_START=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | head -1)
 PREDICTION_END=$(predict -t "${NOAA_HOME}"/predict/weather.tle -p "${1}" | tail -1)
 
-[ -z "$PREDICTION_START" ] && log "predict did not return any values!" ERROR
+[ -z "$PREDICTION_START" ] && log "predict did not return any values for $1!" ERROR
 
 var2=$(echo "${PREDICTION_END}" | cut -d " " -f 1)
 

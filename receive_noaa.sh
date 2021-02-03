@@ -31,6 +31,7 @@ fi
 # $7 = Satellite max elevation
 
 log "Starting rtl_fm record for $1 at $2 to $3 at epoch $5" "INFO"
+log "timeout ${6} /usr/local/bin/rtl_fm ${BIAS_TEE} -f ${2}M -s 60k $GAIN -p $PPM_ERROR -E wav -E deemp -F 9 - | /usr/bin/sox -t raw -e signed -c 1 -b 16 -r 60000 - ${RAMFS_AUDIO}/audio/${3}.wav rate 11025" DEBUG
 timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -f "${2}"M -s 60k $GAIN -p $PPM_ERROR -E wav -E deemp -F 9 - | /usr/bin/sox -t raw -e signed -c 1 -b 16 -r 60000 - "${RAMFS_AUDIO}/audio/${3}.wav" rate 11025
 
 if [ "${SUN_ELEV}" -gt "${SUN_MIN_ELEV}" ]; then
