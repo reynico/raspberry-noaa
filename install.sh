@@ -189,13 +189,21 @@ else
 fi
 
 ### Install medet_arm
-if [ -e /usr/bin/medet_arm ]; then
-    log_done "medet_arm was already installed"
+if [ -e /usr/bin/medet ]; then
+    log_done "medet was already installed"
 else
-    log_running "Installing medet_arm..."
-    sudo cp software/medet_arm /usr/bin/medet_arm
-    sudo chmod +x /usr/bin/medet_arm
-    log_done "medet_arm installed"
+    if [[ $(uname -m) == *"arm"* ]]; then
+        log_running "Installing medet_arm..."
+        sudo cp software/medet_arm /usr/bin/medet
+    elif [[ $(uname -m) == *"x86_64"* ]]; then
+        log_running "Installing medet_x86_64..."
+        sudo cp software/medet_x86_64 /usr/bin/medet
+    else
+	log_error "Unknown archictecture $(uname -m)!"
+        exit -1
+    fi
+    sudo chmod +x /usr/bin/medet
+    log_done "medet installed"
 fi
 
 ### Cron the scheduler

@@ -64,7 +64,7 @@ fi
 
 log "Decoding in progress (QPSK to BMP)" "INFO"
 [ $1 = "METEOR-M2 2"] && medet_extra="-diff"
-medet_arm $medet_extra "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
+medet $medet_extra "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
 
 rm "${METEOR_OUTPUT}/${3}.qpsk"
 
@@ -72,11 +72,11 @@ if [ -f "${METEOR_OUTPUT}/${3}.dec" ]; then
 
     if [ "${SUN_ELEV}" -lt "${SUN_MIN_ELEV}" ]; then
         log "I got a successful ${3}.dec file. Decoding APID 68" "INFO"
-        medet_arm "${METEOR_OUTPUT}/${3}.dec" "${NOAA_OUTPUT}/images/${3}-122" -r 68 -g 68 -b 68 -d
+        medet "${METEOR_OUTPUT}/${3}.dec" "${NOAA_OUTPUT}/images/${3}-122" -r 68 -g 68 -b 68 -d
         /usr/bin/convert $FLIP -negate "${NOAA_OUTPUT}/images/${3}-122.bmp" "${NOAA_OUTPUT}/images/${3}-122.bmp"
     else
         log "I got a successful ${3}.dec file. Creating false color image" "INFO"
-        medet_arm "${METEOR_OUTPUT}/${3}.dec" "${NOAA_OUTPUT}/images/${3}-122" -r 65 -g 65 -b 64 -d
+        medet "${METEOR_OUTPUT}/${3}.dec" "${NOAA_OUTPUT}/images/${3}-122" -r 65 -g 65 -b 64 -d
     fi
 
     log "Rectifying image to adjust aspect ratio" "INFO"
