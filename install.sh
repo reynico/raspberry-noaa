@@ -71,8 +71,8 @@ sudo apt install -yq python-setuptools \
                      libjpeg9 \
                      libjpeg9-dev \
                      socat \
-                     php7.4-fpm \
-                     php7.4-sqlite3 \
+                     php7.3-fpm \
+                     php7.3-sqlite3 \
                      sqlite3
 
 if [ "$raspbian_version" == "stretch" ]; then
@@ -131,7 +131,7 @@ else
 fi
 
 ### install predict
-if [ -e $(which predict) ]; then
+if command -v predict &> /dev/null; then
     log_done "predict was already installed"
 else
     $orig_dir=$(pwd)
@@ -321,7 +321,7 @@ read -rp "Enter your timezone offset (ex: -3 for Argentina time): "
 
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/pi/${usr}/g" "$HOME/.noaa.conf"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.wxtoimgrc"
-sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/$(echo  "$lon * -1" | bc)/g" "$HOME/.predict/predict.qth"
+sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.predict/predict.qth"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/change_tz/$(echo  "$tzoffset * -1" | bc)/g" "sun.py"
 
 success "Install done! Double check your $HOME/.noaa.conf settings"
