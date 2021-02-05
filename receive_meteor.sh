@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 
 ### Run as a normal user
 if [ $EUID -eq 0 ]; then
@@ -10,6 +10,8 @@ fi
 . "$HOME/.noaa.conf"
 . "$HOME/.tweepy.conf"
 . "$NOAA_HOME/common.sh"
+
+log "starting $0" DEBUG
 
 SYSTEM_MEMORY=$(free -m | awk '/^Mem:/{print $2}')
 if [ "$SYSTEM_MEMORY" -lt 2000 ]; then
@@ -48,7 +50,7 @@ log "Starting rtl_fm record for $1 at $2 to $3 at epoch $5" "INFO"
 log "timeout \"${6}\" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f \"${2}\"M -E dc -s $pre_rate $GAIN | sox -t raw -r $pre_rate -c 2 -b 16 -e s - -t wav \"${RAMFS_AUDIO}/audio/${3}.wav\"" DEBUG
 timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f "${2}"M -E dc -s $pre_rate $GAIN | sox -t raw -r $pre_rate -c 2 -b 16 -e s - -t wav "${RAMFS_AUDIO}/audio/${3}.wav" #rate 96k
 
-[ $1 = "METEOR-M2 2"] && demod_extra="-m opsk"
+[[ $1 == "METEOR-M22" ]] && demod_extra="-m opsk"
 log "Demodulation in progress (QPSK) $demod_extra" "INFO"
 meteor_demod $demod_extra -B -o "${METEOR_OUTPUT}/${3}.qpsk" "${RAMFS_AUDIO}/audio/${3}.wav" 2>> $NOAA_LOG
 
@@ -62,8 +64,8 @@ else
     rm "${RAMFS_AUDIO}/audio/${3}.wav"
 fi
 
-log "Decoding in progress (QPSK to BMP)" "INFO"
-[ $1 = "METEOR-M2 2"] && medet_extra="-diff"
+log "Decoding in progress (QPSK to BMP)" INFO
+[[ $1 == "METEOR-M22" ]] && medet_extra="-diff"
 medet $medet_extra "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
 
 rm "${METEOR_OUTPUT}/${3}.qpsk"
