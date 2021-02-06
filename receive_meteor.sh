@@ -44,7 +44,7 @@ fi
 # $6 = Time to capture
 # $7 = Satellite max elevation
 
-pre_rate=288k
+pre_rate=144k
 
 log "Starting rtl_fm record for $1 at $2 to $3 at epoch $5" "INFO"
 log "timeout \"${6}\" /usr/local/bin/rtl_fm ${BIAS_TEE} -p $PPM_ERROR -M raw -f \"${2}\"M -E dc -s $pre_rate $GAIN | sox -t raw -r $pre_rate -c 2 -b 16 -e s - -t wav \"${RAMFS_AUDIO}/audio/${3}.wav\"" DEBUG
@@ -71,7 +71,7 @@ medet $medet_extra "${METEOR_OUTPUT}/${3}.qpsk" "${METEOR_OUTPUT}/${3}" -cd
 rm "${METEOR_OUTPUT}/${3}.qpsk"
 
 if [ -f "${METEOR_OUTPUT}/${3}.dec" ]; then
-
+    log "Sun elevation: ${SUN_ELEV}" DEBUG
     if [ "${SUN_ELEV}" -lt "${SUN_MIN_ELEV}" ]; then
         log "I got a successful ${3}.dec file. Decoding APID 68" "INFO"
         medet "${METEOR_OUTPUT}/${3}.dec" "${NOAA_OUTPUT}/images/${3}-122" -r 68 -g 68 -b 68 -d
