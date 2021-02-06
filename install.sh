@@ -104,11 +104,11 @@ fi
 if [ -e /usr/local/bin/rtl_fm ]; then
     log_done "rtl-sdr was already installed"
 else
-    log_running "Installing rtl-sdr from osmocom..."
+    log_running "Installing rtl-sdr from librtlsdr..."
     (
         cd /tmp/
-        git clone https://github.com/osmocom/rtl-sdr.git
-        cd rtl-sdr/
+        git clone https://github.com/librtlsdr/librtlsdr.git
+        cd librtlsdr/
         mkdir build
         cd build
         cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
@@ -205,6 +205,26 @@ else
     sudo chmod +x /usr/bin/medet
     log_done "medet installed"
 fi
+
+### Install noaa-apt
+if command -v noaa-apt &> /dev/null; then
+    log_done "noaa-apt was already installed"
+else
+    if [[ $(uname -m) == *"arm"* ]]; then
+        log_running "Installing noaa-apt arm..."
+        unzip software/noaa-apt-1.3.0-armv7-linux-gnueabihf-nogui.zip
+        sudo mv noaa-apt /usr/bin
+	sudo mv res /usr/bin 	#ok, this is not so nice, but it works
+    elif [[ $(uname -m) == *"x86_64"* ]]; then
+        log_running "Installing noaa-apt x86..."
+        sudo dpkg -i software/noaa-apt_1.3.0-1_amd64.deb
+    else
+	log_error "Unknown archictecture $(uname -m)!"
+        exit -1
+    fi
+    log_done "noaa-apt installed"
+fi
+
 
 ### Cron the scheduler
 set +e
