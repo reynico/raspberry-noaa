@@ -286,6 +286,7 @@ else
     log_done "pd120_decoder installed"
 fi
 
+cp templates/sun.py .
 
 success "Install (almost) done!"
 
