@@ -222,6 +222,8 @@ else
 	log_error "Unknown archictecture $(uname -m)!"
         exit -1
     fi
+    mkdir -p "$HOME/.config/noaa-apt"
+    cp templates/settings.toml "$HOME/.config/noaa-apt"
     log_done "noaa-apt installed"
 fi
 
@@ -343,6 +345,8 @@ sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/pi/${usr}/g"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.wxtoimgrc"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.predict/predict.qth"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/change_tz/$(echo  "$tzoffset * -1" | bc)/g" "sun.py"
+sed -i -e "s/change_tz/$tzoffset/g" "$HOME/.config/noaa-apt/settings.toml"
+sed -i -e "s/change_tz/$tzoffset/g" "sun.py"
 
 success "Install done! Double check your $HOME/.noaa.conf settings"
 

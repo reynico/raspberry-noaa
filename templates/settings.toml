@@ -1,0 +1,139 @@
+# noaa-apt settings
+
+# Settings file version, newer noaa-apt releases will require more fields and
+# variables
+version = 3
+
+check_updates = true
+
+[timestamps]
+
+# Prefer reading recording times from file modification timestamps instead of
+# looking at the date and time on the filename. If the filename format is not
+# recognised, timestamps are going to be used anyways. In this case the inferred
+# satellite will be always NOAA 19 and you will have to indicate it otherwise.
+prefer_timestamps = false
+
+# Supported filenames. Indicate where years, hours, etc. are located on the
+# filename, used to detemine recording time and satellite received from
+# filename. The program will compare the loaded WAV filename against each one of
+# these formats until it finds a match, if no match is found, the time will be
+# loaded from the file modification timestamp and the sat will be NOAA 19. If
+# some date/time value is missing, the current will be used. E.g. if there is no
+# month, the current month will be used.
+#
+# Supported variables:
+# - %Y: Year as a 4 digit number.
+# - %m: Month as a 2 digit number.
+# - %d: Day as a 2 digit number.
+# - %H: Hour as a 2 digit number.
+# - %M: Minute as a 2 digit number.
+# - %S: Second as a 2 digit number.
+# - %N: Satellite number, should be 15, 18 or 19.
+# - %!: Recording frequency in Hz, also used to determine satellite number
+#   (noaa-apt knows that e.g. NOAA 19 uses 137.1MHz or close). Should have 9
+#   consecutive digits, e.g: 137100000.
+# - %1, %2, %3, ..., %9: Ignore 1, 2, 3, ... 9 characters. Useful if the
+#   filename has something not useful that can change, for example pass elevation.
+filenames = [
+    # gqrx_20181222_203941_137100000.wav
+    "gqrx_%Y%m%d_%H%M%S_%!.wav",
+
+    # SDRSharp_20200325_204556Z_137102578Hz_AF.wav
+    "SDRSharp_%Y%m%d_%H%M%SZ_%!Hz_AF.wav",
+
+    # On WXtoIMG go to Option > File Names and Locations...
+    # Set this template: %Y%m%d-%H%M-%e-%s
+    "%Y%m%d-%H%M-noaa-%N.wav",
+
+    # NOAA15-20200325-060601.wav
+    "NOAA%N-%Y%m%d-%H%M%S.wav",
+
+    # N1520200327073417.wav
+    "N%N%Y%m%d%H%M%S.wav",
+
+    # 2020-02-09-05-24-16-NOAA_19.wav
+    "%Y-%m-%d-%H-%M-%S-NOAA_%N.wav",
+
+    # 20200320-213957NOAA19El64.wav
+    "%Y%m%d-%H%M%SNOAA%NEl%2.wav",
+]
+
+# Timezone offset in hours to assume when reading filenames.
+timezone = change_tz # UTC+1
+
+[map_overlay]
+
+# Default colors as RGBA. Set alpha to 0 to disable
+default_countries_color = [255, 255, 0, 255]
+default_states_color = [255, 255, 0, 150]
+default_lakes_color = [50, 200, 200, 255]
+
+[false_color]
+
+# Values used as thresholds for false color algorithm:
+# [water, vegetation, clouds]
+# Valid values: 0..255 with water < vegetation < clouds
+default_false_color_values = [50, 105, 137]
+
+
+[profiles]
+
+default_profile = "standard"
+
+# Allowed profiles are "standard", "fast", and "slow". Each one has:
+
+# - work_rate: Sample rate to use when processing in Hz. Choose a multiple of
+#   4160 equal or bigger than 12480
+
+# - resample_atten: Attenuation in dB for the resampling filter.
+
+# - resample_delta_freq: Transition band width in Hz for the resampling filter.
+
+# - resample_cutout: Cutout frequency in Hz of the resampling filter. The
+#   transition band goes from `cutout - delta_freq / 2` to
+#   `cutout + delta_freq / 2`.
+
+# - demodulation_atten: Attenuation in dB for the demodulation filter.
+
+# - wav_resample_atten: Attenuation in dB, used when resampling a WAV into
+#   another WAV. Not used when decoding images
+
+# - wav_resample_delta_freq: Transition band width in pi radians per second,
+#   used when resampling a WAV into another WAV. Not used when decoding images
+
+
+    # Should work perfectly on every image
+    [profiles.standard]
+
+    work_rate = 12480
+    resample_atten = 30
+    resample_delta_freq = 1000
+    resample_cutout = 4800
+    demodulation_atten = 25
+    wav_resample_atten = 40
+    wav_resample_delta_freq = 0.1
+
+    # Fast profile, the filters are less strict and noise can be a problem, but
+    # it should be barely visible
+    [profiles.fast]
+
+    work_rate = 16640
+    resample_atten = 30
+    resample_delta_freq = 3000
+    resample_cutout = 4800
+    demodulation_atten = 23
+    wav_resample_atten = 30
+    wav_resample_delta_freq = 0.2
+
+    # Should be used temporarily if there is a problem with the "standard"
+    # profile in some images. But leave a bug report in that case.
+    [profiles.slow]
+
+    work_rate = 20800
+    resample_atten = 40
+    resample_delta_freq = 500
+    resample_cutout = 4800
+    demodulation_atten = 25
+    wav_resample_atten = 50
+    wav_resample_delta_freq = 0.05
