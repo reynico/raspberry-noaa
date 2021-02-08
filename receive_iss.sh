@@ -26,7 +26,7 @@ fi
 # $7 = Satellite max elevation
 
 log "Starting rtl_fm record" "INFO"
-timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -M fm -f 145.8M -s 48k -g $GAIN -E dc -E wav -E deemp -F 9 - | sox -t raw -r 48k -c 1 -b 16 -e s - -t wav "${NOAA_OUTPUT}/audio/${3}.wav" rate 11025
+timeout "${6}" /usr/local/bin/rtl_fm ${BIAS_TEE} -M fm -f ${2}M -s 48k $GAIN -E dc -E wav -E deemp -F 9 - | sox -t raw -r 48k -c 1 -b 16 -e s - -t wav "${NOAA_OUTPUT}/audio/${3}.wav" rate 11025
 
 if [ -f "$NOAA_HOME/demod.py" ]; then
     log "Decoding ISS pass" "INFO"
@@ -52,5 +52,8 @@ if [ -f "$NOAA_HOME/demod.py" ]; then
             fi
         fi
         sqlite3 "$NOAA_HOME/panel.db" "update predict_passes set is_active = 0 where (predict_passes.pass_start) in (select predict_passes.pass_start from predict_passes inner join decoded_passes on predict_passes.pass_start = decoded_passes.pass_start where decoded_passes.id = $pass_id);"
+    else
+        log "Did not receive any images from ISS" ERROR
+        sqlite3 "$NOAA_HOME/panel.db" "update predict_passes set is_active = 0 where predict_passes.pass_start = $5;"
     fi
 fi

@@ -53,12 +53,11 @@ if [ "$raspbian_version" == "stretch" ]; then
 fi
 
 sudo apt update -yq
-sudo apt install -yq predict \
-                     python-setuptools \
-                     ntp \
+sudo apt install -yq python-setuptools \
+		     unzip zip \
                      cmake \
-                     libusb-1.0 \
-                     sox \
+                     libusb-1.0-0-dev \
+                     sox libsox-fmt-mp3 \
                      at \
                      bc \
                      nginx \
@@ -72,8 +71,8 @@ sudo apt install -yq predict \
                      libjpeg9 \
                      libjpeg9-dev \
                      socat \
-                     php7.2-fpm \
-                     php7.2-sqlite \
+                     php7.3-fpm \
+                     php7.3-sqlite3 \
                      sqlite3
 
 if [ "$raspbian_version" == "stretch" ]; then
@@ -105,11 +104,11 @@ fi
 if [ -e /usr/local/bin/rtl_fm ]; then
     log_done "rtl-sdr was already installed"
 else
-    log_running "Installing rtl-sdr from osmocom..."
+    log_running "Installing rtl-sdr from librtlsdr..."
     (
         cd /tmp/
-        git clone https://github.com/osmocom/rtl-sdr.git
-        cd rtl-sdr/
+        git clone https://github.com/librtlsdr/librtlsdr.git
+        cd librtlsdr/
         mkdir build
         cd build
         cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
@@ -129,6 +128,19 @@ else
     log_running "Installing WxToIMG..."
     sudo dpkg -i software/wxtoimg-armhf-2.11.2-beta.deb
     log_done "WxToIMG installed"
+fi
+
+### install predict
+if command -v predict &> /dev/null; then
+    log_done "predict was already installed"
+else
+    $orig_dir=$(pwd)
+    cd software
+    tar -xzf predict-2.2.7.tar.gz
+    cd predict-2.2.7
+    sudo ./configure	#this also installs :X
+    cd $orig_dir
+    log_done "predict installed"
 fi
 
 ### Install default config file
@@ -177,14 +189,44 @@ else
 fi
 
 ### Install medet_arm
-if [ -e /usr/bin/medet_arm ]; then
-    log_done "medet_arm was already installed"
+if [ -e /usr/bin/medet ]; then
+    log_done "medet was already installed"
 else
-    log_running "Installing medet_arm..."
-    sudo cp software/medet_arm /usr/bin/medet_arm
-    sudo chmod +x /usr/bin/medet_arm
-    log_done "medet_arm installed"
+    if [[ $(uname -m) == *"arm"* ]]; then
+        log_running "Installing medet_arm..."
+        sudo cp software/medet_arm /usr/bin/medet
+    elif [[ $(uname -m) == *"x86_64"* ]]; then
+        log_running "Installing medet_x86_64..."
+        sudo cp software/medet_x86_64 /usr/bin/medet
+    else
+	log_error "Unknown archictecture $(uname -m)!"
+        exit -1
+    fi
+    sudo chmod +x /usr/bin/medet
+    log_done "medet installed"
 fi
+
+### Install noaa-apt
+if command -v noaa-apt &> /dev/null; then
+    log_done "noaa-apt was already installed"
+else
+    if [[ $(uname -m) == *"arm"* ]]; then
+        log_running "Installing noaa-apt arm..."
+        unzip software/noaa-apt-1.3.0-armv7-linux-gnueabihf-nogui.zip
+        sudo mv noaa-apt /usr/bin
+	sudo mv res /usr/bin 	#ok, this is not so nice, but it works
+    elif [[ $(uname -m) == *"x86_64"* ]]; then
+        log_running "Installing noaa-apt x86..."
+        sudo dpkg -i software/noaa-apt_1.3.0-1_amd64.deb
+    else
+	log_error "Unknown archictecture $(uname -m)!"
+        exit -1
+    fi
+    mkdir -p "$HOME/.config/noaa-apt"
+    cp templates/settings.toml "$HOME/.config/noaa-apt"
+    log_done "noaa-apt installed"
+fi
+
 
 ### Cron the scheduler
 set +e
@@ -192,23 +234,24 @@ crontab -l | grep -q "raspberry-noaa"
 if [ $? -eq 0 ]; then
     log_done "Crontab for schedule.sh already exists"
 else
-    cat <(crontab -l) <(echo "1 0 * * * /home/pi/raspberry-noaa/schedule.sh") | crontab -
+    cat <(crontab -l) <(echo "1 0 * * * $HOME/raspberry-noaa/schedule.sh") | crontab -
     log_done "Crontab installed"
 fi
 set -e
 
 ### Setup Nginx
 log_running "Setting up Nginx..."
+usr=$(whoami)
 sudo cp templates/nginx.cfg /etc/nginx/sites-enabled/default
 (
     sudo mkdir -p /var/www/wx/images
-    sudo chown -R pi:pi /var/www/wx
-    sudo usermod -a -G www-data pi
+    sudo chown -R $usr:$usr /var/www/wx
+    sudo usermod -a -G www-data $usr
     sudo chmod 775 /var/www/wx
 )
 sudo systemctl restart nginx
 sudo cp -rp templates/webpanel/* /var/www/wx/
-
+sed -i -e "s/pi/${usr}/g" "/var/www/wx/Model/Conn.php"
 log_done "Nginx configured"
 
 ### Setup ramFS
@@ -243,6 +286,7 @@ else
     log_done "pd120_decoder installed"
 fi
 
+cp templates/sun.py .
 
 success "Install (almost) done!"
 
@@ -298,10 +342,12 @@ read -rp "Enter your longitude (West values are negative): "
 read -rp "Enter your timezone offset (ex: -3 for Argentina time): "
     tzoffset=$REPLY
 
-sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.noaa.conf"
+sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/pi/${usr}/g" "$HOME/.noaa.conf"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.wxtoimgrc"
-sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/$(echo  "$lon * -1" | bc)/g" "$HOME/.predict/predict.qth"
+sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g" "$HOME/.predict/predict.qth"
 sed -i -e "s/change_latitude/${lat}/g;s/change_longitude/${lon}/g;s/change_tz/$(echo  "$tzoffset * -1" | bc)/g" "sun.py"
+sed -i -e "s/change_tz/$tzoffset/g" "$HOME/.config/noaa-apt/settings.toml"
+sed -i -e "s/change_tz/$tzoffset/g" "sun.py"
 
 success "Install done! Double check your $HOME/.noaa.conf settings"
 
@@ -315,4 +361,8 @@ set +e
 ### Running WXTOIMG to have the user accept the licensing agreement
 wxtoimg
 
-sudo reboot
+read -rp "reboot now? (Y/n)"
+    doreboot=$REPLY
+
+[ ! -z "$doreboot" ] || sudo reboot
+[ "$doreboot" == "y" ] && sudo reboot

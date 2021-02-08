@@ -4,6 +4,7 @@
 # set -x
 
 . "$HOME/.noaa.conf"
+export PATH=$PATH:/usr/local/bin/
 
 declare -A levels=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3)
 log_level=${LOG_LEVEL}
@@ -21,6 +22,7 @@ log() {
 
     #log here
     echo "${log_priority} : ${log_message}"
+    echo $(date '+%d-%m-%Y %H:%M') $0 "${log_priority} : ${log_message}" >> "$NOAA_LOG"
 }
 
 ## current date and folder structure
